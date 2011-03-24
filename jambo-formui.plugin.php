@@ -15,6 +15,11 @@ require_once 'jambohandler.php';
 class JamboFormUI extends Plugin
 {
 	public function get_jambo_form( ) {
+if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( $_POST[ 'jambo_email' ] ) and isset( $_POST[ 'jambo_message' ] ) ) {
+			$form = new FormUI( 'jambo' );
+			$form->append( 'static', 'message', 'I see what you did there.' );
+			return $form;
+} else {
 		// borrow default values from the comment forms
 		$commenter_name = '';
 		$commenter_email = '';
@@ -46,7 +51,7 @@ class JamboFormUI extends Plugin
 			_t( 'Name <span class="required">*Required</span>' ),
 			'formcontrol_text'
 		)->add_validator( 'validate_required', _t( 'The Name field value is required' ) )
-		->id = 'comment_name';
+		->id = 'jambo_name';
 		$form->jambo_name->tabindex = 1;
 		$form->jambo_name->value = $commenter_name;
 
@@ -58,7 +63,7 @@ class JamboFormUI extends Plugin
 			_t( 'Email' ),
 			'formcontrol_text'
 		)->add_validator( 'validate_email', _t( 'The Email field value must be a valid email address' ) )
-		->id = 'comment_email';
+		->id = 'jambo_email';
 		$form->jambo_email->tabindex = 2;
 		if ( Options::get( 'comments_require_id' ) == 1 ) {
 			$form->jambo_email->add_validator(  'validate_required', _t( 'The Email field value must be a valid email address' ) );
@@ -75,7 +80,7 @@ class JamboFormUI extends Plugin
 			'formcontrol_textarea'
 		)->add_validator( 'validate_required', _t( 'Your message cannot be blank.', 'jambo' ) )
 		->id = 'jambo_message';
-		$form->jambo_content->tabindex = 4;
+		$form->jambo_message->tabindex = 4;
 
 		// Create the Submit button
 		$form->append( 'submit', 'jambo_submit', _t( 'Submit' ), 'formcontrol_submit' );
@@ -83,6 +88,7 @@ class JamboFormUI extends Plugin
 
 		// Return the form object
 		return $form;
+		}
 	}
 
 	private static function default_options()
@@ -131,7 +137,7 @@ class JamboFormUI extends Plugin
 	
 	public function filter_post_content_out( $content )
 	{
-		$content = str_ireplace( array('<!-- jambo -->', '<!-- contactform -->'), $this->get_jambo_form()->gett(), $content );
+		$content = str_ireplace( array('<!-- jambo -->', '<!-- contactform -->'), $this->get_jambo_form()->get(), $content );
 		return $content;
 	}
 	
