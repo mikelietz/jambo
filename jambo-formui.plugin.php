@@ -131,7 +131,7 @@ class JamboFormUI extends Plugin
 	
 	public function filter_post_content_out( $content )
 	{
-		$content = str_ireplace( array('<!-- jambo -->', '<!-- contactform -->'), $this->get_jambo_form()->out(), $content );
+		$content = str_ireplace( array('<!-- jambo -->', '<!-- contactform -->'), $this->get_jambo_form()->gett(), $content );
 		return $content;
 	}
 	
