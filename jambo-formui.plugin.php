@@ -90,8 +90,29 @@ class JamboFormUI extends Plugin
 
 	private function process_jambo( $form )
 	{
-		
+		// get the values and the stored options.
 
+		$email = array();
+		$email['sent'] =           false;
+		$email['valid'] =          true;
+		$email['send_to'] =        Jambo::get( 'send_to' );
+		$email['subject_prefix'] = Jambo::get( 'subject_prefix' );
+		$email['name'] =           $this->handler_vars['name'];
+		$email['email'] =          $this->handler_vars['email'];
+		$email['subject'] =        $this->handler_vars['subject'];
+		$email['message'] =        $this->handler_vars['message'];
+		$email['osa'] =            $this->handler_vars['osa'];
+		$email['osa_time'] =       $this->handler_vars['osa_time'];
+		
+		$email['headers'] = "MIME-Version: 1.0\r\n" .
+			"From: {$email['name']} <{$email['email']}>\r\n" .
+			"Content-Type: text/plain; charset=\"utf-8\"\r\n";
+		
+		$email = Plugins::filter( 'jambo_email', $email, $this->handler_vars );
+		
+		if ( $email['valid'] ) {
+			$email['sent'] = Utils::mail( $email['send_to'], $email['subject_prefix'] . $email['subject'], $email['message'], $email['headers'] );
+		}
 	}
 
 	private static function default_options()
@@ -114,28 +135,28 @@ class JamboFormUI extends Plugin
 	
 	public function configure()
 	{
-					$ui = new FormUI( 'jambo' );
-					
-					// Add a text control for the address you want the email sent to
-					$send_to = $ui->append( 'text', 'send_to', 'option:jambo__send_to', _t( 'Where To Send Email: ' ) );
-					$send_to->add_validator( 'validate_required' );
-					
-					// Add a text control for the prefix to the subject field
-					$subject_prefix = $ui->append( 'text', 'subject_prefix', 'option:jambo__subject_prefix', _t( 'Subject Prefix: ' ) );
-					$subject_prefix->add_validator( 'validate_required' );
-					
-					$show_form_on_success = $ui->append( 'checkbox', 'show_form_on_success', 'option:jambo__show_form_on_success', _t( 'Show Contact Form After Sending?: ' ) );
-					
-					// Add a text control for the prefix to the success message
-					$success_msg = $ui->append( 'textarea', 'success_msg', 'option:jambo__success_msg', _t( 'Success Message: ' ) );
-					$success_msg->add_validator( 'validate_required' );
-					
-					// Add a text control for the prefix to the subject field
-					$error_msg = $ui->append( 'textarea', 'error_msg', 'option:jambo__error_msg', _t( 'Error Message: ') );
-					$error_msg->add_validator( 'validate_required' );
-					
-					$ui->append( 'submit', 'save', 'Save' );
-					return $ui;;
+		$ui = new FormUI( 'jambo' );
+
+		// Add a text control for the address you want the email sent to
+		$send_to = $ui->append( 'text', 'send_to', 'option:jambo__send_to', _t( 'Where To Send Email: ' ) );
+		$send_to->add_validator( 'validate_required' );
+
+		// Add a text control for the prefix to the subject field
+		$subject_prefix = $ui->append( 'text', 'subject_prefix', 'option:jambo__subject_prefix', _t( 'Subject Prefix: ' ) );
+		$subject_prefix->add_validator( 'validate_required' );
+
+		$show_form_on_success = $ui->append( 'checkbox', 'show_form_on_success', 'option:jambo__show_form_on_success', _t( 'Show Contact Form After Sending?: ' ) );
+
+		// Add a text control for the prefix to the success message
+		$success_msg = $ui->append( 'textarea', 'success_msg', 'option:jambo__success_msg', _t( 'Success Message: ' ) );
+		$success_msg->add_validator( 'validate_required' );
+
+		// Add a text control for the prefix to the subject field
+		$error_msg = $ui->append( 'textarea', 'error_msg', 'option:jambo__error_msg', _t( 'Error Message: ') );
+		$error_msg->add_validator( 'validate_required' );
+
+		$ui->append( 'submit', 'save', 'Save' );
+		return $ui;;
 	}
 	
 	public function filter_post_content_out( $content )
