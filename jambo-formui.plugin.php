@@ -10,16 +10,11 @@
  * @todo allow "custom fields" to be added by user.
  */
 
-require_once 'jambohandler.php';
+// require_once 'jambohandler.php';
 
 class JamboFormUI extends Plugin
 {
 	public function get_jambo_form( ) {
-if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( $_POST[ 'jambo_email' ] ) and isset( $_POST[ 'jambo_message' ] ) ) {
-			$form = new FormUI( 'jambo' );
-			$form->append( 'static', 'message', 'I see what you did there.' );
-			return $form;
-} else {
 		// borrow default values from the comment forms
 		$commenter_name = '';
 		$commenter_email = '';
@@ -48,7 +43,7 @@ if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( 
 			'text',
 			'jambo_name',
 			'null:null',
-			_t( 'Name <span class="required">*Required</span>' ),
+			_t( 'Name <span class="required">(Required)</span>' ),
 			'formcontrol_text'
 		)->add_validator( 'validate_required', _t( 'The Name field value is required' ) )
 		->id = 'jambo_name';
@@ -67,7 +62,7 @@ if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( 
 		$form->jambo_email->tabindex = 2;
 		if ( Options::get( 'comments_require_id' ) == 1 ) {
 			$form->jambo_email->add_validator(  'validate_required', _t( 'The Email field value must be a valid email address' ) );
-			$form->jambo_email->caption = _t( 'Email <span class="required">*Required</span>' );
+			$form->jambo_email->caption = _t( 'Email <span class="required">(Required)</span>' );
 		}
 		$form->jambo_email->value = $commenter_email;
 
@@ -86,9 +81,17 @@ if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( 
 		$form->append( 'submit', 'jambo_submit', _t( 'Submit' ), 'formcontrol_submit' );
 		$form->jambo_submit->tabindex = 5;
 
+		// Set up form processing
+		$form->on_success( 'process_jambo' );
+
 		// Return the form object
 		return $form;
-		}
+	}
+
+	private function process_jambo( $form )
+	{
+		
+
 	}
 
 	private static function default_options()
@@ -194,31 +197,6 @@ if ( isset( $_POST[ 'FormUI' ] ) and isset( $_POST[ 'jambo_name' ] ) and isset( 
 		return $email;
 	}
 	
-	/**
-	 * Get a 10-digit hex code that identifies the user submitting the feedback
-	 * @param The IP address of the commenter
-	 * @return A 10-digit hex code
-	 **/	 	 	 	 
-	private function get_code( $ip = '' )
-	{
-		if( $ip == '' ) {
-			$ip = ip2long($_SERVER['REMOTE_ADDR']);
-		}
-		$code = substr(md5( Options::get('GUID') . 'more salt' . $ip ), 0, 10);
-		$code = Plugins::filter('jambo_code', $code, $ip);
-		return $code;
-	}
-
-	/**
-	 * Verify a 10-digit hex code that identifies the user submitting the feedback
-	 * @param The IP address of the commenter
-	 * @return True if the code is valid, false if not
-	 **/
-	private function verify_code( $suspect_code, $ip = '' )
-	{
-		return ( $suspect_code == $this->get_code( $ip ) );
-	}
-
 	private function get_OSA( $time ) {
 		$osa = 'osa_' . substr( md5( $time . Options::get( 'GUID' ) . self::VERSION ), 0, 10 );
 		$osa = Plugins::filter('jambo_OSA', $osa, $time);
