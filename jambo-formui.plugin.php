@@ -43,9 +43,9 @@ class JamboFormUI extends Plugin
 			'text',
 			'jambo_name',
 			'null:null',
-			_t( 'Name <span class="required">(Required)</span>' ),
+			_t( 'Name' ),
 			'formcontrol_text'
-		)->add_validator( 'validate_required', _t( 'The Name field value is required' ) )
+		)->add_validator( 'validate_required', _t( 'Your Name is required.' ) )
 		->id = 'jambo_name';
 		$form->jambo_name->tabindex = 1;
 		$form->jambo_name->value = $commenter_name;
@@ -57,13 +57,10 @@ class JamboFormUI extends Plugin
 			'null:null',
 			_t( 'Email' ),
 			'formcontrol_text'
-		)->add_validator( 'validate_email', _t( 'The Email field value must be a valid email address' ) )
+		)->add_validator( 'validate_email', _t( 'Your Email must be a valid address.' ) )
 		->id = 'jambo_email';
 		$form->jambo_email->tabindex = 2;
-		if ( Options::get( 'comments_require_id' ) == 1 ) {
-			$form->jambo_email->add_validator(  'validate_required', _t( 'The Email field value must be a valid email address' ) );
-			$form->jambo_email->caption = _t( 'Email <span class="required">(Required)</span>' );
-		}
+		$form->jambo_email->caption = _t( 'Email' );
 		$form->jambo_email->value = $commenter_email;
 
 		// Create the Message field
@@ -83,13 +80,14 @@ class JamboFormUI extends Plugin
 
 		// Set up form processing
 		$form->on_success( 'process_jambo' );
-
 		// Return the form object
 		return $form;
 	}
 
-	private function process_jambo( $form )
+	function process_jambo( $form )
 	{
+		// why isn't this being run?
+Utils::debug( $form ); die();
 		// get the values and the stored options.
 
 		$email = array();
@@ -115,17 +113,6 @@ class JamboFormUI extends Plugin
 		}
 	}
 
-	private static function default_options()
-	{
-		return array(
-			'send_to' => $_SERVER['SERVER_ADMIN'],
-			'subject_prefix' => _t( '[CONTACT FORM] ' ),
-			'show_form_on_success' => 1,
-			'success_msg' => _t( 'Thank you for your feedback. I\'ll get back to you as soon as possible.' ),
-			'error_msg' => _t( 'The following errors occurred with the information you submitted. Please correct them and re-submit the form.' )
-			);
-	}
-	
 	public function set_priorities()
 	{
 		return array(
@@ -142,18 +129,8 @@ class JamboFormUI extends Plugin
 		$send_to->add_validator( 'validate_required' );
 
 		// Add a text control for the prefix to the subject field
-		$subject_prefix = $ui->append( 'text', 'subject_prefix', 'option:jambo__subject_prefix', _t( 'Subject Prefix: ' ) );
+		$subject_prefix = $ui->append( 'text', 'subject', 'option:jambo__subject', _t( 'Subject: ' ) );
 		$subject_prefix->add_validator( 'validate_required' );
-
-		$show_form_on_success = $ui->append( 'checkbox', 'show_form_on_success', 'option:jambo__show_form_on_success', _t( 'Show Contact Form After Sending?: ' ) );
-
-		// Add a text control for the prefix to the success message
-		$success_msg = $ui->append( 'textarea', 'success_msg', 'option:jambo__success_msg', _t( 'Success Message: ' ) );
-		$success_msg->add_validator( 'validate_required' );
-
-		// Add a text control for the prefix to the subject field
-		$error_msg = $ui->append( 'textarea', 'error_msg', 'option:jambo__error_msg', _t( 'Error Message: ') );
-		$error_msg->add_validator( 'validate_required' );
 
 		$ui->append( 'submit', 'save', 'Save' );
 		return $ui;;
@@ -167,34 +144,12 @@ class JamboFormUI extends Plugin
 	
 	public function filter_jambo_email( $email, $handlervars )
 	{
-		if ( !$this->verify_code($handlervars['jcode']) ) {
-			ob_end_clean();
-			header('HTTP/1.1 403 Forbidden');
-			die(_t('<h1>The selected action is forbidden.</h1><p>Please enable cookies in your browser.</p>'));
-		}
 		if ( ! $this->verify_OSA( $handlervars['osa'], $handlervars['osa_time'] ) ) {
 			ob_end_clean();
 			header('HTTP/1.1 403 Forbidden');
 			die(_t('<h1>The selected action is forbidden.</h1><p>You are submitting the form too fast and look like a spam bot.</p>'));
 		}
 		
-		if ( empty( $email['name'] ) ) {
-			$email['valid']= false;
-			$email['errors']['name']= _t( '<em>Your Name</em> is a <strong>required field</strong>.' );
-		}
-		if ( empty( $email['email'] ) ) {
-			$email['valid']= false;
-			$email['errors']['email']= _t( '<em>Your Email</em> is a <strong>required field</strong>.' );
-		}
-		// validate email addy as per RFC2822 and RFC2821 with a little exception (see: http://www.regular-expressions.info/email.html)
-		elseif( !preg_match("@^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*\@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$@i", $email['email'] ) ) {
-			$email['valid']= false;
-			$email['errors']['email']= _t( '<em>Your Email</em> must be a <strong>valid email address.</strong>' );
-		}
-		if ( empty( $email['message'] ) ) {
-			$email['valid']= false;
-			$email['errors']['message']= _t( '<em>Your Remarks</em> is a <strong>required field</strong>.' );
-		}
 		if( $email['valid'] !== false ) {
 			$comment = new Comment( array(
 				'name' => $email['name'],
@@ -245,41 +200,6 @@ class JamboFormUI extends Plugin
 		return "<input type=\"hidden\" name=\"osa\" value=\"$osa\" />\n<input type=\"hidden\" name=\"osa_time\" value=\"$time\" />\n";
 	}
 
-	private function get_form()
-	{
-		if ( $this->theme instanceof Theme && $this->theme->template_exists( 'jambo.form' ) ) {
-			$vars = array_merge( User::commenter(), Session::get_set( 'jambo_email' ) );
-			
-			$this->theme->jambo = new stdClass;
-			$jambo = $this->theme->jambo;
-			
-			$jambo->form_action = URL::get('jambo');
-			$jambo->success_msg = self::get( 'success_msg' );
-			$jambo->error_msg = self::get('error_msg');
-			$jambo->show_form = true;
-			$jambo->success = false;
-			$jambo->error = false;
-
-			if ( array_key_exists( 'valid', $vars ) && $vars['valid'] ) {
-				$jambo->success = true;
-				$jambo->show_form = self::get( 'show_form_on_success' );
-			}
-			
-			if ( array_key_exists( 'errors', $vars ) ) {
-				$jambo->error = true;
-				$jambo->errors = $vars['errors'];
-			}
-
-			$jambo->name = $this->input( 'text', 'name', 'Your Name: (Required)', $vars );
-			$jambo->email = $this->input( 'text', 'email', 'Your Email: (Required)', $vars );
-			$jambo->subject = $this->input( 'text', 'subject', 'Subject: ', $vars );
-			$jambo->message = $this->input( 'textarea', 'message', 'Your Remarks: (Required)', $vars );
-			$jambo->osa = $this->OSA( $vars );
-			
-			return $this->theme->fetch( 'jambo.form' );
-		}
-		return null;
-	}
 }
 
 ?>
