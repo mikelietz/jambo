@@ -79,7 +79,7 @@ class JamboFormUI extends Plugin
 		$form->jambo_submit->tabindex = 5;
 
 		// Set up form processing
-		$form->on_success( 'process_jambo' );
+		$form->on_success( array($this, 'process_jambo') );
 		// Return the form object
 		return $form;
 	}
