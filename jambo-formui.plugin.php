@@ -8,6 +8,8 @@
  * @todo document the functions.
  * @todo use AJAX to submit form, fallback on default if no AJAX.
  * @todo allow "custom fields" to be added by user.
+ * @todo redo the hook and make it easy to add other formui comment stuff.
+ * @todo use Habari's spam filtering.
  */
 
 // require_once 'jambohandler.php';
@@ -86,31 +88,29 @@ class JamboFormUI extends Plugin
 
 	function process_jambo( $form )
 	{
-		// why isn't this being run?
-Utils::debug( $form ); die();
 		// get the values and the stored options.
 
 		$email = array();
-		$email['sent'] =           false;
-		$email['valid'] =          true;
-		$email['send_to'] =        Jambo::get( 'send_to' );
-		$email['subject_prefix'] = Jambo::get( 'subject_prefix' );
-		$email['name'] =           $this->handler_vars['name'];
-		$email['email'] =          $this->handler_vars['email'];
-		$email['subject'] =        $this->handler_vars['subject'];
-		$email['message'] =        $this->handler_vars['message'];
+		$email['sent'] =		false;
+		$email['send_to'] =	Options::get( 'jambo__send_to' );
+		$email['name'] = $form->jambo_name->value;
+		$email['email'] = $form->jambo_email->value;
+		$email['subject'] = Options::get( 'jambo__subject' );
+		$email['message'] = $form->jambo_message->value;
+/*		// interesting stuff, this OSA business. If it's not covered by FormUI, maybe it should be.
 		$email['osa'] =            $this->handler_vars['osa'];
 		$email['osa_time'] =       $this->handler_vars['osa_time'];
+*/		
+		// Utils::mail expects an array
+		$email['headers'] = array( 'MIME-Version' => '1.0',
+			'From' => "{$email['name']} <{$email['email']}>",
+			'Content-Type' => 'text/plain; charset="utf-8"' );
+
+// 		$email = Plugins::filter( 'jambo_email', $email /* something */ );
 		
-		$email['headers'] = "MIME-Version: 1.0\r\n" .
-			"From: {$email['name']} <{$email['email']}>\r\n" .
-			"Content-Type: text/plain; charset=\"utf-8\"\r\n";
-		
-		$email = Plugins::filter( 'jambo_email', $email, $this->handler_vars );
-		
-		if ( $email['valid'] ) {
-			$email['sent'] = Utils::mail( $email['send_to'], $email['subject_prefix'] . $email['subject'], $email['message'], $email['headers'] );
-		}
+		$email['sent'] = Utils::mail( $email['send_to'], $email['subject'], $email['message'], $email['headers'] );
+
+		return false;
 	}
 
 	public function set_priorities()
