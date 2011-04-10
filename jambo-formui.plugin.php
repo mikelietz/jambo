@@ -15,7 +15,7 @@
 // require_once 'jambohandler.php';
 
 class JamboFormUI extends Plugin
-{
+{	
 	public function get_jambo_form( ) {
 		// borrow default values from the comment forms
 		$commenter_name = '';
@@ -97,6 +97,7 @@ class JamboFormUI extends Plugin
 		$email['email'] = $form->jambo_email->value;
 		$email['subject'] = Options::get( 'jambo__subject' );
 		$email['message'] = $form->jambo_message->value;
+		$email['success_msg'] = Options::get ( 'jambo__success_msg','Thank you contacting me. I\'ll get back to you as soon as possible.' );
 /*		// interesting stuff, this OSA business. If it's not covered by FormUI, maybe it should be.
 		$email['osa'] =            $this->handler_vars['osa'];
 		$email['osa_time'] =       $this->handler_vars['osa_time'];
@@ -110,7 +111,7 @@ class JamboFormUI extends Plugin
 		
 		$email['sent'] = Utils::mail( $email['send_to'], $email['subject'], $email['message'], $email['headers'] );
 
-		return false;
+		return '<p class="jambo-confirmation">' .$email ['success_msg']  .'</p>';
 	}
 
 	public function set_priorities()
@@ -131,9 +132,12 @@ class JamboFormUI extends Plugin
 		// Add a text control for the prefix to the subject field
 		$subject_prefix = $ui->append( 'text', 'subject', 'option:jambo__subject', _t( 'Subject: ' ) );
 		$subject_prefix->add_validator( 'validate_required' );
-
+		
+		// Add a text control for the prefix to the success message
+		$success_msg = $ui->append( 'textarea', 'success_msg', 'option:jambo__success_msg', _t( 'Success Message: ' ) );
+		
 		$ui->append( 'submit', 'save', 'Save' );
-		return $ui;;
+		return $ui;
 	}
 	
 	public function filter_post_content_out( $content )
