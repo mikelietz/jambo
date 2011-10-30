@@ -60,7 +60,8 @@ class JamboFormUI extends Plugin
 		$form->jambo_email->value = $commenter_email;
 
 		// Create the Subject field
-		$form->append( 'text', 'jambo_subject', 'null:null', _t( 'Subject', 'jambo' ) );
+		$form->append( 'text', 'jambo_subject', 'null:null', _t( 'Subject', 'jambo' ) )
+				->id = 'jambo_subject';
 		$form->jambo_subject->tabindex = 3;
 
 		// Create the Message field
