@@ -78,7 +78,7 @@ class JamboFormUI extends Plugin
 		self::OSA( $form );
 		
 		// Set up form processing
-		$form->on_success( array($this, 'process_jambo') );
+		$form->on_success( array( $this, 'process_jambo' ) );
 		// Return the form object
 		return $form;
 	}
@@ -95,10 +95,7 @@ class JamboFormUI extends Plugin
 		$email['subject'] = Options::get( 'jambo__subject' ) . ' ' . $form->jambo_subject;
 		$email['message'] = $form->jambo_message->value;
 		$email['success_msg'] = Options::get ( 'jambo__success_msg','Thank you contacting me. I\'ll get back to you as soon as possible.' );
-/*		// interesting stuff, this OSA business. If it's not covered by FormUI, maybe it should be.
-		$email['osa'] =            $this->handler_vars['osa'];
-		$email['osa_time'] =       $this->handler_vars['osa_time'];
-*/		
+		
 		// Utils::mail expects an array
 		$email['headers'] = array( 'MIME-Version' => '1.0',
 			'From' => "{$email['name']} <{$email['email']}>",
@@ -187,18 +184,6 @@ class JamboFormUI extends Plugin
 		return false;
 	}
 
-	/* private function OSA( $vars ) {
-		if ( array_key_exists( 'osa', $vars ) && array_key_exists( 'osa_time', $vars ) ) {
-			$osa = $vars['osa'];
-			$time = $vars['osa_time'];
-		}
-		else {
-			$time = time();
-			$osa = $this->get_OSA( $time );
-		}
-		return "<input type=\"hidden\" name=\"osa\" value=\"$osa\" />\n<input type=\"hidden\" name=\"osa_time\" value=\"$time\" />\n";
-	}*/
-	
 	private static function OSA( $form ) 
 	{
 		$time = time();
