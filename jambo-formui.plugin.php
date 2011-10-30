@@ -71,6 +71,9 @@ class JamboFormUI extends Plugin
 		$form->append( 'submit', 'jambo_submit', _t( 'Submit' ) );
 		$form->jambo_submit->tabindex = 5;
 
+		// Allow other plugins and theme authors to modify and customise this form easily.
+		Plugins::act( 'form_jambo', $form, $this );
+		
 		// Create hidden OSA fields
 		self::OSA( $form );
 		
