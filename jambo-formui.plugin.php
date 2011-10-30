@@ -65,6 +65,10 @@ class JamboFormUI extends Plugin
 		$form->jambo_email->caption = _t( 'Email' );
 		$form->jambo_email->value = $commenter_email;
 
+		// Create the Subject field
+		$form->append( 'text', 'jambo_subject', 'null:null', _t( 'Subject', 'jambo' ) );
+		$form->jambo_name->tabindex = 1;
+		
 		// Create the Message field
 		$form->append(
 			'text',
@@ -95,7 +99,7 @@ class JamboFormUI extends Plugin
 		$email['send_to'] =	Options::get( 'jambo__send_to' );
 		$email['name'] = $form->jambo_name->value;
 		$email['email'] = $form->jambo_email->value;
-		$email['subject'] = Options::get( 'jambo__subject' );
+		$email['subject'] = Options::get( 'jambo__subject' ) . ' ' . $form->jambo_subject;
 		$email['message'] = $form->jambo_message->value;
 		$email['success_msg'] = Options::get ( 'jambo__success_msg','Thank you contacting me. I\'ll get back to you as soon as possible.' );
 /*		// interesting stuff, this OSA business. If it's not covered by FormUI, maybe it should be.
@@ -130,7 +134,7 @@ class JamboFormUI extends Plugin
 		$send_to->add_validator( 'validate_required' );
 
 		// Add a text control for the prefix to the subject field
-		$subject_prefix = $ui->append( 'text', 'subject', 'option:jambo__subject', _t( 'Subject: ' ) );
+		$subject_prefix = $ui->append( 'text', 'subject', 'option:jambo__subject', _t( 'Subject Prefix: ' ) );
 		$subject_prefix->add_validator( 'validate_required' );
 		
 		// Add a text control for the prefix to the success message
