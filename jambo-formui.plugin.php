@@ -5,11 +5,9 @@
  *
  * @package jambo
  *
- * @todo document the functions.
  * @todo use AJAX to submit form, fallback on default if no AJAX.
  * @todo allow "custom fields" to be added by user.
  * @todo redo the hook and make it easy to add other formui comment stuff.
- * @todo use Habari's spam filtering.
  */
 
 // require_once 'jambohandler.php';
@@ -18,7 +16,11 @@ class JamboFormUI extends Plugin
 {	
 	const VERSION = '2.0';
 	
-	public function get_jambo_form( ) {
+	/**
+	 * Create the default email form
+	 */
+	public function get_jambo_form( ) 
+	{
 		// borrow default values from the comment forms
 		$commenter_name = '';
 		$commenter_email = '';
@@ -60,7 +62,7 @@ class JamboFormUI extends Plugin
 		// Create the Subject field
 		$form->append( 'text', 'jambo_subject', 'null:null', _t( 'Subject', 'jambo' ) );
 		$form->jambo_subject->tabindex = 3;
-		
+
 		// Create the Message field
 		$form->append( 'textarea', 'jambo_message', 'null:null', _t( 'Message', 'jambo' ) )
 				->add_validator( 'validate_required', _t( 'Your message cannot be blank.', 'jambo' ) )
@@ -83,9 +85,14 @@ class JamboFormUI extends Plugin
 		return $form;
 	}
 
+	/**
+	 * Process the submitted form and send the email
+	 * 
+	 * @param type $form
+	 * @return String 
+	 */
 	function process_jambo( $form )
 	{
-		
 		// get the values and the stored options.
 		$email = array();
 		$email['sent'] =		false;
@@ -115,6 +122,9 @@ class JamboFormUI extends Plugin
 			);
 	}
 	
+	/**
+	 * The plugin configuration form.
+	 */
 	public function configure()
 	{
 		$ui = new FormUI( 'jambo' );
@@ -134,12 +144,21 @@ class JamboFormUI extends Plugin
 		return $ui;
 	}
 	
+	/**
+	 * Replace <!-- jambo --> or <!-- contactform --> in the post content with 
+	 * the Jambo email form.
+	 */
 	public function filter_post_content_out( $content )
 	{
 		$content = str_ireplace( array('<!-- jambo -->', '<!-- contactform -->'), $this->get_jambo_form()->get(), $content );
 		return $content;
 	}
 	
+	/**
+	 * Verify the submitted form has been submitted by a real user and also pass
+	 * it through Spam Checker plugin.  The spam checking part will only be 
+	 * effective if the plugin is enabled.
+	 */
 	public function filter_jambo_email( $email, $osa, $time )
 	{
 		if ( ! self::verify_OSA( $osa, $time ) ) {
@@ -169,13 +188,21 @@ class JamboFormUI extends Plugin
 		return $email;
 	}
 	
-	private static function get_OSA( $time ) {
+	/**
+	 * Create the OSA based on the time string submitted and the plugin version
+	 */
+	private static function get_OSA( $time )
+	{
 		$osa = 'osa_' . substr( md5( $time . Options::get( 'GUID' ) . self::VERSION ), 0, 10 );
 		$osa = Plugins::filter( 'jambo_OSA', $osa, $time );
 		return $osa;
 	}
 
-	private static function verify_OSA( $osa, $time ) {
+	/**
+	 * Verify that the OSA and time passed are valid.
+	 */
+	private static function verify_OSA( $osa, $time )
+	{
 		if ( $osa == self::get_OSA( $time ) ) {
 			if ( ( time() > ( $time + 5 ) ) && ( time() < ( $time + 5*60 ) ) ) {
 				return true;
@@ -184,6 +211,9 @@ class JamboFormUI extends Plugin
 		return false;
 	}
 
+	/**
+	 * Add the OSA fields to the form.
+	 */
 	private static function OSA( $form ) 
 	{
 		$time = time();
