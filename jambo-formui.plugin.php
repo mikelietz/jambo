@@ -67,7 +67,7 @@ class JamboFormUI extends Plugin
 
 		// Create the Subject field
 		$form->append( 'text', 'jambo_subject', 'null:null', _t( 'Subject', 'jambo' ) );
-		$form->jambo_name->tabindex = 3;
+		$form->jambo_subject->tabindex = 3;
 		
 		// Create the Message field
 		$form->append(
