@@ -14,8 +14,6 @@
 
 class JamboFormUI extends Plugin
 {	
-	const VERSION = '2.0';
-	
 	/**
 	 * Create the default email form
 	 */
@@ -140,7 +138,6 @@ class JamboFormUI extends Plugin
 		
 		// Add a text control for the prefix to the success message
 		$success_msg = $ui->append( 'textarea', 'success_msg', 'option:jambo__success_msg', _t( 'Success Message: ' ) );
-		
 		$ui->append( 'submit', 'save', 'Save' );
 		return $ui;
 	}
@@ -190,11 +187,11 @@ class JamboFormUI extends Plugin
 	}
 	
 	/**
-	 * Create the OSA based on the time string submitted and the plugin version
+	 * Create the OSA based on the time string submitted and the UID for this Habari installation.
 	 */
 	private static function get_OSA( $time )
 	{
-		$osa = 'osa_' . substr( md5( $time . Options::get( 'GUID' ) . self::VERSION ), 0, 10 );
+		$osa = 'osa_' . substr( md5( $time . Options::get( 'GUID' ) ), 0, 10 );
 		$osa = Plugins::filter( 'jambo_OSA', $osa, $time );
 		return $osa;
 	}
