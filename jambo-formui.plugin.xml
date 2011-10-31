@@ -7,4 +7,9 @@
 	<url>http://drunkenmonkey.org/projects/jambo</url>
 	<description><![CDATA[Adds a contact form to any page or post.]]></description>
 	<copyright>2011</copyright>
+	<help>
+		<value>
+			<![CDATA[Add a contact form by inserting either <code>&lt;!-- jambo --&gt;</code> or <code>&lt;!-- contactform --&gt;</code> into an entry or page.]]>
+		</value>
+	</help>
 </pluggable>  
