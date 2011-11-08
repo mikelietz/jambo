@@ -75,8 +75,8 @@ class JamboFormUI extends Plugin
 		// Allow other plugins and theme authors to modify and customise this form easily.
 		Plugins::act( 'form_jambo', $form, $this );
 		
-		// Create hidden OSA fields
-		self::OSA( $form );
+		// Create hidden token fields
+		self::insert_token( $form );
 		
 		// Set up form processing
 		$form->on_success( array( $this, 'process_jambo' ) );
@@ -107,7 +107,7 @@ class JamboFormUI extends Plugin
 			'From' => "{$email['name']} <{$email['email']}>",
 			'Content-Type' => 'text/plain; charset="utf-8"' );
 
- 		$email = Plugins::filter( 'jambo_email', $email, $form->osa->value, $form->osa_time->value );
+ 		$email = Plugins::filter( 'jambo_email', $email, $form->token->value, $form->token_time->value );
 		
 		$email['sent'] = Utils::mail( $email['send_to'], $email['subject'], $email['message'], $email['headers'] );
 
@@ -157,9 +157,9 @@ class JamboFormUI extends Plugin
 	 * it through Spam Checker plugin.  The spam checking part will only be 
 	 * effective if the plugin is enabled.
 	 */
-	public function filter_jambo_email( $email, $osa, $time )
+	public function filter_jambo_email( $email, $token, $timestamp )
 	{
-		if ( ! self::verify_OSA( $osa, $time ) ) {
+		if ( ! self::verify_token( $token, $timestamp ) ) {
 			ob_end_clean();
 			header( 'HTTP/1.1 403 Forbidden' );
 			die( '<h1>' . _t( 'The selected action is forbidden.' ) . '</h1><p>' . _t( 'You are submitting the form too fast and look like a spam bot.' ) . '</p>' );
@@ -187,22 +187,22 @@ class JamboFormUI extends Plugin
 	}
 	
 	/**
-	 * Create the OSA based on the time string submitted and the UID for this Habari installation.
+	 * Create the token based on the time string submitted and the UID for this Habari installation.
 	 */
-	private static function get_OSA( $time )
+	private static function create_token( $timestamp )
 	{
-		$osa = 'osa_' . substr( md5( $time . Options::get( 'GUID' ) ), 0, 10 );
-		$osa = Plugins::filter( 'jambo_OSA', $osa, $time );
-		return $osa;
+		$token = substr( md5( $timestamp . Options::get( 'GUID' ) ), 0, 10 );
+		$token = Plugins::filter( 'jambo_token', $token, $timestamp );
+		return $token;
 	}
 
 	/**
-	 * Verify that the OSA and time passed are valid.
+	 * Verify that the token and time passed are valid.
 	 */
-	private static function verify_OSA( $osa, $time )
+	private static function verify_token( $token, $timestamp )
 	{
-		if ( $osa == self::get_OSA( $time ) ) {
-			if ( ( time() > ( $time + 5 ) ) && ( time() < ( $time + 5*60 ) ) ) {
+		if ( $token == self::create_token( $timestamp ) ) {
+			if ( ( time() > ( $timestamp + 5 ) ) && ( time() < ( $timestamp + 5*60 ) ) ) {
 				return true;
 			}
 		}
@@ -210,14 +210,14 @@ class JamboFormUI extends Plugin
 	}
 
 	/**
-	 * Add the OSA fields to the form.
+	 * Add the token fields to the form.
 	 */
-	private static function OSA( $form ) 
+	private static function insert_token( $form ) 
 	{
-		$time = time();
-		$osa = self::get_OSA( $time );
-		$form->append( 'hidden', 'osa', 'null:null' )->value = $osa;
-		$form->append( 'hidden', 'osa_time', 'null:null' )->value = $time;
+		$timestamp = time();
+		$token = self::create_token( $timestamp );
+		$form->append( 'hidden', 'token', 'null:null' )->value = $token;
+		$form->append( 'hidden', 'token_time', 'null:null' )->value = $timestamp;
 		return $form;
 	}
 }
