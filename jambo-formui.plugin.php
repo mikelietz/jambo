@@ -201,7 +201,7 @@ class JamboFormUI extends Plugin
 	 */
 	private static function verify_token( $token, $timestamp )
 	{
-		if ( $token == self::get_token( $timestamp ) ) {
+		if ( $token == self::create_token( $timestamp ) ) {
 			if ( ( time() > ( $timestamp + 5 ) ) && ( time() < ( $timestamp + 5*60 ) ) ) {
 				return true;
 			}
@@ -215,7 +215,7 @@ class JamboFormUI extends Plugin
 	private static function insert_token( $form ) 
 	{
 		$timestamp = time();
-		$token = self::get_token( $time );
+		$token = self::create_token( $timestamp );
 		$form->append( 'hidden', 'token', 'null:null' )->value = $token;
 		$form->append( 'hidden', 'token_time', 'null:null' )->value = $timestamp;
 		return $form;
