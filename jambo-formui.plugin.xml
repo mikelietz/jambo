@@ -3,10 +3,12 @@
 	<name>Jambo</name>
 	<license url="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Software License 2.0</license>
 	<author url="http://drunkenmonkey.org/projects/jambo">Drunken Monkey Labs</author>
+	<author url="http://mikelietz.org/code">Mike Lietz</author>
 	<version>2.0</version>
 	<url>http://drunkenmonkey.org/projects/jambo</url>
 	<description><![CDATA[Adds a contact form to any page or post.]]></description>
 	<copyright>2011</copyright>
+	<guid>a9dd31f3-d5d0-436f-bf8c-3c417ae5d2de</guid>
 	<help>
 		<value>
 			<![CDATA[Add a contact form by inserting either <code>&lt;!-- jambo --&gt;</code> or <code>&lt;!-- contactform --&gt;</code> into an entry or page.]]>
